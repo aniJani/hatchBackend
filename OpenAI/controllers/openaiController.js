@@ -9,15 +9,20 @@ function parseSubtasks(taskContent) {
         let stepTitle = headerMatch ? headerMatch[2].trim() : null;
 
         let estimatedTime = "Variable"; // Default if not explicitly mentioned or if it's variable.
-        const timeMatch = section.match(/- \*\*Estimated Time\*\*: (.+)/); // Adjusted to capture any following text.
+        const timeMatch = section.match(/- \*\*Estimated Time\*\*: (.+)/);
 
         if (timeMatch && timeMatch[1].trim() !== 'Variable') {
-            estimatedTime = timeMatch[1].trim(); // Could be "X hours" or "Variable"; directly use the matched text.
+            estimatedTime = timeMatch[1].trim();
         }
+
+        // Extract short description for the step
+        const descriptionMatch = section.match(/- \*\*Description\*\*: (.+)/);
+        let description = descriptionMatch ? descriptionMatch[1].trim() : "No description provided";
 
         return {
             stepNumber,
             stepTitle,
+            description,
             estimatedTime
         };
     });
@@ -27,22 +32,34 @@ function parseSubtasks(taskContent) {
 
 const generateDivTasks = async (req, res) => {
     const { task } = req.body;
+
+    // Updated prompt to generalize for any project type
     const dividedTasks = await openai.chat.completions.create({
         model: "gpt-4-0125-preview",
         messages: [
             {
                 role: 'user',
-                content: `Quickly break down the task "${task}" into steps with titles and estimated completion times. Use 'Variable' for times that can't be estimated. Format:
+                content: `Imagine you are planning to complete the project "${task}". Break down this project into detailed steps required to accomplish it, regardless of the domain. If the project is coding-related, include detailed steps on completing the frontend, backend, and algorithmic logic. If the project involves developing a product, like a toy, include detailed steps on conceptualization, design, prototyping, testing, and production. For any project, provide comprehensive steps that guide someone through its completion.
 
-                ### Step <Number>: <Title>
-                - **Estimated Time**: <Hours> hours or 'Variable'`
+For each step, include:
+
+1. A title
+2. A short description detailing what the step involves
+3. An estimated completion time (use 'Variable' if the time cannot be estimated)
+
+Format:
+
+### Step <Number>: <Title>
+- **Description**: <Description of the step>
+- **Estimated Time**: <Hours> hours or 'Variable'`
             }
         ],
         max_tokens: 800,
     });
+
     const subtasks = parseSubtasks(dividedTasks.choices[0].message['content']);
     res.status(200).json({ subtasks });
     console.log(dividedTasks.choices[0].message['content']);
 };
 
-module.exports = { generateDivTasks }
+module.exports = { generateDivTasks };
