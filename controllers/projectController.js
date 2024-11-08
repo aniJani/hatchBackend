@@ -13,6 +13,6 @@ const getProjects = async (req, res) => {
 };
 
 
-  
-module.exports = { getProjects, getProjectsByUserId };
+
+module.exports = { getProjects };
 
