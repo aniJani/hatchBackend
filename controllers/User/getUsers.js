@@ -1,4 +1,4 @@
-const User = require('../models/userModel'); // Adjust the path to your User model if necessary
+const User = require('../../models/userModel'); // Adjust the path to your User model if necessary
 
 /**
  * Finds a user by their email and returns their details without embeddings.

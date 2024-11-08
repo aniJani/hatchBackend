@@ -4,6 +4,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const userRoutes = require('./routes/userRoutes'); // Import user routes
+const projectRoutes = require('./routes/projectRoutes');
 
 const app = express();
 
@@ -24,6 +25,9 @@ app.post('/openai/TaskGen', generateDivTasks);
 
 // User Routes
 app.use('/user', userRoutes); // Use user routes with the '/user' path prefix
+
+// Project Routes
+app.use('/projects', projectRoutes);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

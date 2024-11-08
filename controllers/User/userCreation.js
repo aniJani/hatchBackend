@@ -1,7 +1,7 @@
 // userCreation.js
 
-const User = require('../models/userModel'); // Adjust the path as necessary
-const { getEmbedding } = require('../OpenAI/controllers/openaiController'); // Import getEmbedding from OpenAIcontroller
+const User = require('../../models/userModel'); // Adjust the path as necessary
+const { getEmbedding } = require('../../OpenAI/controllers/openaiController'); // Import getEmbedding from OpenAIcontroller
 
 // Function to create a new user in MongoDB
 const createUser = async (req, res) => {

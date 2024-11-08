@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
-const User = require('../models/userModel');
-const { getEmbedding } = require('../OpenAI/controllers/openaiController'); // Update this path as necessary
+const User = require('../../models/userModel');
+const { getEmbedding } = require('../../OpenAI/controllers/openaiController'); // Update this path as necessary
 
 // Function to calculate cosine similarity between two vectors
 function cosineSimilarity(vec1, vec2) {

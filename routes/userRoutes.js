@@ -1,7 +1,7 @@
 const express = require('express');
-const { createUser } = require('../controllers/userCreation'); // Adjust the path if necessary
-const { matchUsers } = require('../controllers/matchUser');
-const { getUserByEmail } = require('../controllers/getUsers');
+const { createUser } = require('../controllers/User/userCreation'); // Adjust the path if necessary
+const { matchUsers } = require('../controllers/User/matchUser');
+const { getUserByEmail } = require('../controllers/User/getUsers');
 const router = express.Router();
 
 // Route to create a new user
