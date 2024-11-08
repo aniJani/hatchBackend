@@ -26,7 +26,7 @@ const getEmbedding = async (text) => {
             Array.isArray(response.data.data[0].embedding)
         ) {
             const embedding = response.data.data[0].embedding;
-            return embedding;
+            return normalizeVector(embedding);
         } else {
             throw new Error('Unexpected response structure from OpenAI API');
         }
@@ -109,5 +109,15 @@ Format:
     res.status(200).json({ subtasks });
     console.log(dividedTasks.choices[0].message['content']);
 };
+
+function normalizeVector(vector) {
+    const magnitude = Math.sqrt(vector.reduce((sum, val) => sum + val * val, 0));
+    return vector.map(val => val / magnitude);
+}
+
+function cosineSimilarity(vec1, vec2) {
+    const dotProduct = vec1.reduce((sum, val, i) => sum + val * vec2[i], 0);
+    return dotProduct; // Since vectors are normalized, dot product equals cosine similarity
+}
 
 module.exports = { generateDivTasks, getEmbedding };
