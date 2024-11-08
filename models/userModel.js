@@ -11,13 +11,20 @@ const userSchema = new Schema({
         type: String,
         required: true
     },
-
     description: {
         type: String,
         default: ''
     },
+    descriptionEmbedding: {
+        type: [Number], // Array of numbers representing the embedding vector
+        default: []
+    },
     skills: {
         type: [String],
+        default: []
+    },
+    skillsEmbedding: {
+        type: [Number], // Embedding vector for the skills field
         default: []
     },
     openToCollaboration: {

@@ -1,4 +1,52 @@
 const openai = require('../config/openaiconfig');
+const axios = require('axios');
+const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
+
+const getEmbedding = async (text) => {
+    try {
+        const response = await axios.post(
+            'https://api.openai.com/v1/embeddings',
+            {
+                input: text,
+                model: 'text-embedding-ada-002',
+                encoding_format: 'float' // Ensure this parameter is supported by the API
+            },
+            {
+                headers: {
+                    'Authorization': `Bearer ${OPENAI_API_KEY}`,
+                    'Content-Type': 'application/json'
+                }
+            }
+        );
+
+        if (
+            response.data &&
+            Array.isArray(response.data.data) &&
+            response.data.data.length > 0 &&
+            Array.isArray(response.data.data[0].embedding)
+        ) {
+            const embedding = response.data.data[0].embedding;
+            return embedding;
+        } else {
+            throw new Error('Unexpected response structure from OpenAI API');
+        }
+    } catch (error) {
+        // Enhanced error handling
+        if (error.response) {
+            // The request was made, and the server responded with a status code outside of the 2xx range
+            console.error('Error response from OpenAI API:', error.response.data);
+            throw new Error(`OpenAI API Error: ${error.response.data.error.message}`);
+        } else if (error.request) {
+            // The request was made, but no response was received
+            console.error('No response received from OpenAI API:', error.request);
+            throw new Error('No response received from OpenAI API');
+        } else {
+            // Something else happened while setting up the request
+            console.error('Error setting up the request:', error.message);
+            throw new Error(`Error generating embedding: ${error.message}`);
+        }
+    }
+};
 
 function parseSubtasks(taskContent) {
     const sections = taskContent.split('\n\n');
@@ -62,4 +110,4 @@ Format:
     console.log(dividedTasks.choices[0].message['content']);
 };
 
-module.exports = { generateDivTasks };
+module.exports = { generateDivTasks, getEmbedding };
