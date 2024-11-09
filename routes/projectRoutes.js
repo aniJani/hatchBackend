@@ -1,6 +1,6 @@
 // routes/projectRoutes.js
 const express = require('express');
-const { fetchProjectsByUser, createProject, getProjectById } = require('../controllers/projectController'); // Import the controller
+const { fetchProjectsByUser, createProject, getProjectById, editProject } = require('../controllers/projectController'); // Import the controller
 
 const router = express.Router();
 
@@ -8,6 +8,7 @@ const router = express.Router();
 router.get('/list', fetchProjectsByUser);
 router.post('/create', createProject);
 router.get('/:projectId', getProjectById);
+router.put('/:projectId/edit', editProject);
 // // New route to fetch projects by userId
 // router.get('/user/:userId', getProjectsByUserId);
 
