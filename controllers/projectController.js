@@ -1,7 +1,5 @@
-// controllers/projectController.js
 const Project = require('../models/projectModel'); // Import the Project model
 
-// Controller to get the list of projects
 const getProjects = async (req, res) => {
   try {
     const projects = await Project.find(); // Fetch all projects from the database
@@ -12,15 +10,9 @@ const getProjects = async (req, res) => {
   }
 };
 
-/**
- * Function to create and save a new project in MongoDB
- * @param {Object} req - The request object, containing project details in the body.
- * @param {Object} res - The response object.
- */
 const createProject = async (req, res) => {
   const { projectName, description, ownerEmail, collaboratorEmails, goals } = req.body;
 
-  // Check if required fields are provided
   if (!projectName || !ownerEmail) {
     return res.status(400).json({ error: 'Project name and owner email are required' });
   }
@@ -28,20 +20,21 @@ const createProject = async (req, res) => {
   try {
     // Create the collaborators array, adding the owner as the first collaborator with role "owner"
     const collaborators = [
-      { email: ownerEmail, role: 'owner' }, // Owner is added as a collaborator with role "owner"
-      ...(Array.isArray(collaboratorEmails) ? collaboratorEmails.map(email => ({
-        email,
-        role: 'collaborator'
-      })) : [])
+      { email: ownerEmail, role: 'owner' },
+      ...(Array.isArray(collaboratorEmails) ? collaboratorEmails.map(email => ({ email, role: 'collaborator' })) : [])
     ];
 
-    // Validate that assigned emails in goals are in the list of collaborators
-    const validatedGoals = Array.isArray(goals) ? goals.map(goal => {
+    // Validate and filter goals
+    const validatedGoals = goals.map(goal => {
+      // Check if assignedTo email exists in collaborators
       if (goal.assignedTo && !collaborators.some(collab => collab.email === goal.assignedTo)) {
         throw new Error(`Assigned email ${goal.assignedTo} is not a collaborator on this project.`);
       }
-      return goal;
-    }) : [];
+      return {
+        ...goal,
+        estimatedTime: goal.estimatedTime || '',
+      };
+    });
 
     // Create a new project document
     const newProject = new Project({
@@ -51,9 +44,7 @@ const createProject = async (req, res) => {
       goals: validatedGoals
     });
 
-    // Save the project to the database
     await newProject.save();
-
     res.status(201).json({ message: 'Project created successfully', project: newProject });
   } catch (error) {
     console.error('Error creating project:', error);
@@ -63,4 +54,3 @@ const createProject = async (req, res) => {
 
 
 module.exports = { getProjects, createProject };
-

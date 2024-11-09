@@ -12,19 +12,19 @@ const projectSchema = new Schema({
     },
     collaborators: [{
         email: {
-            type: String, // Email of the collaborator
+            type: String,
             required: true
         },
         role: {
             type: String,
-            enum: ['owner', 'collaborator'], // Role can be 'owner' or 'collaborator'
+            enum: ['owner', 'collaborator'],
             required: true
         }
     }],
     goals: [{
         goalId: {
             type: Schema.Types.ObjectId,
-            default: () => new mongoose.Types.ObjectId() // Corrected: generate a unique goal ID
+            default: () => new mongoose.Types.ObjectId()
         },
         title: {
             type: String,
@@ -41,17 +41,14 @@ const projectSchema = new Schema({
         },
         assignedTo: {
             type: String, // Email of the collaborator assigned to this goal
-            validate: {
-                validator: function (email) {
-                    // Validate that assignedTo is in the list of collaborators' emails
-                    return this.collaborators.some(collaborator => collaborator.email === email);
-                },
-                message: 'Assigned email must be a collaborator on this project'
-            }
+        },
+        estimatedTime: {
+            type: String,
+            default: ''
         }
     }]
 }, {
-    timestamps: true // Automatically manage createdAt and updatedAt fields
+    timestamps: true
 });
 
 module.exports = mongoose.model('Project', projectSchema);
