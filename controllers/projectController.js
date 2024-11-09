@@ -63,31 +63,58 @@ const fetchProjectsByUser = async (req, res) => {
   const { email, role } = req.query; // Assuming email and role are passed as query parameters
 
   if (!email) {
-      return res.status(400).json({ error: 'Email is required' });
+    return res.status(400).json({ error: 'Email is required' });
   }
 
   try {
-      // Find projects where the given email is an owner or a collaborator
-      const projects = await Project.find({
-          $or: [
-              { 'collaborators.email': email }, // Check if the user is a collaborator
-              { 'ownerEmail': email }           // Check if the user is the project owner (if applicable)
-          ]
-      });
+    // Find projects where the given email is an owner or a collaborator
+    const projects = await Project.find({
+      $or: [
+        { 'collaborators.email': email }, // Check if the user is a collaborator
+        { 'ownerEmail': email }           // Check if the user is the project owner (if applicable)
+      ]
+    });
 
-      // Filter projects by role if the role is provided
-      let filteredProjects = projects;
-      if (role) {
-          filteredProjects = projects.filter(project =>
-              project.collaborators.some(collab => collab.email === email && collab.role === role)
-          );
-      }
+    // Filter projects by role if the role is provided
+    let filteredProjects = projects;
+    if (role) {
+      filteredProjects = projects.filter(project =>
+        project.collaborators.some(collab => collab.email === email && collab.role === role)
+      );
+    }
 
-      res.status(200).json({ projects: filteredProjects });
+    res.status(200).json({ projects: filteredProjects });
   } catch (error) {
-      console.error('Error fetching projects:', error);
-      res.status(500).json({ error: 'Failed to fetch projects' });
+    console.error('Error fetching projects:', error);
+    res.status(500).json({ error: 'Failed to fetch projects' });
   }
 };
-module.exports = { getProjects, createProject,  fetchProjectsByUser };
+
+/**
+ * Function to fetch a project by its project ID.
+ * @param {Object} req - The request object containing projectId in the parameters.
+ * @param {Object} res - The response object.
+ */
+const getProjectById = async (req, res) => {
+  const { projectId } = req.params;
+
+  if (!projectId) {
+    return res.status(400).json({ error: 'Project ID is required' });
+  }
+
+  try {
+    const project = await Project.findById(projectId);
+
+    if (!project) {
+      return res.status(404).json({ error: 'Project not found' });
+    }
+
+    res.status(200).json(project);
+  } catch (error) {
+    console.error('Error fetching project:', error);
+    res.status(500).json({ error: 'Failed to fetch project' });
+  }
+};
+
+module.exports = { getProjects, createProject, fetchProjectsByUser, getProjectById };
 
