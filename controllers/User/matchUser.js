@@ -45,7 +45,7 @@ const matchUsers = async (req, res) => {
         // Sort users by similarity in descending order and get the top 5
         const topMatches = userSimilarities
             .sort((a, b) => b.similarity - a.similarity)
-            .slice(0, 5)
+            .slice(0, 6)
             .map(entry => {
                 const { descriptionEmbedding, skillsEmbedding, ...userWithoutEmbeddings } = entry.user.toObject();
                 return userWithoutEmbeddings;
@@ -58,4 +58,51 @@ const matchUsers = async (req, res) => {
     }
 };
 
-module.exports = { matchUsers };
+const matchProjectCollaborators = async (req, res) => {
+    try {
+        const { projectId, query } = req.body;
+
+        if (!projectId || !query || typeof query !== 'string') {
+            return res.status(400).json({ error: 'Invalid projectId or query' });
+        }
+
+        // Generate embedding for the query
+        const queryEmbedding = await getEmbedding(query);
+        const normalizedQueryEmbedding = normalizeVector(queryEmbedding);
+
+        // Find the project by projectId and get its collaborators
+        const project = await Project.findById(projectId);
+        if (!project) {
+            return res.status(404).json({ error: 'Project not found' });
+        }
+
+        const collaborators = project.collaborators;
+        if (!collaborators || collaborators.length === 0) {
+            return res.status(200).json([]); // No collaborators in this project
+        }
+
+        // Calculate similarity for each collaborator based on skills and description embeddings
+        const collaboratorSimilarities = collaborators.map(collaborator => {
+            const combinedEmbedding = [
+                ...(collaborator.skillsEmbedding || []),
+                ...(collaborator.descriptionEmbedding || [])
+            ];
+            const normalizedCollaboratorEmbedding = normalizeVector(combinedEmbedding);
+            const similarity = cosineSimilarity(normalizedQueryEmbedding, normalizedCollaboratorEmbedding);
+
+            return { collaborator, similarity };
+        });
+
+        // Sort collaborators by similarity in descending order and get the top matches
+        const topMatches = collaboratorSimilarities
+            .sort((a, b) => b.similarity - a.similarity)
+            .map(entry => entry.collaborator);
+
+        res.status(200).json(topMatches);
+    } catch (error) {
+        console.error('Error matching project collaborators:', error.message);
+        res.status(500).json({ error: 'Error matching project collaborators' });
+    }
+};
+
+module.exports = { matchUsers, matchProjectCollaborators };
