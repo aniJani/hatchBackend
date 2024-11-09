@@ -10,25 +10,21 @@ const projectSchema = new Schema({
         type: String,
         default: ''
     },
-    ownerId: {
-        type: Schema.Types.ObjectId,
-        ref: 'User',
-        required: true
-    },
     collaborators: [{
-        userId: {
-            type: Schema.Types.ObjectId,
-            ref: 'User'
+        email: {
+            type: String, // Email of the collaborator
+            required: true
         },
         role: {
             type: String,
-            default: 'collaborator'
+            enum: ['owner', 'collaborator'], // Role can be 'owner' or 'collaborator'
+            required: true
         }
     }],
     goals: [{
         goalId: {
             type: Schema.Types.ObjectId,
-            default: mongoose.Types.ObjectId // Generate a unique goal ID
+            default: () => new mongoose.Types.ObjectId() // Corrected: generate a unique goal ID
         },
         title: {
             type: String,
@@ -42,6 +38,16 @@ const projectSchema = new Schema({
             type: String,
             enum: ['not started', 'in progress', 'completed'],
             default: 'not started'
+        },
+        assignedTo: {
+            type: String, // Email of the collaborator assigned to this goal
+            validate: {
+                validator: function (email) {
+                    // Validate that assignedTo is in the list of collaborators' emails
+                    return this.collaborators.some(collaborator => collaborator.email === email);
+                },
+                message: 'Assigned email must be a collaborator on this project'
+            }
         }
     }]
 }, {
