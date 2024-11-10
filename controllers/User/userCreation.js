@@ -1,11 +1,9 @@
-// userCreation.js
-
 const User = require('../../models/userModel'); // Adjust the path as necessary
 const { getEmbedding } = require('../../OpenAI/controllers/openaiController'); // Import getEmbedding from OpenAIcontroller
 
 // Function to create a new user in MongoDB
 const createUser = async (req, res) => {
-    const { email, name, description, skills, openToCollaboration } = req.body;
+    const { email, name, description, skills, openToCollaboration, expoPushToken } = req.body;
 
     // Check if all required fields are provided
     if (!email || !name) {
@@ -38,6 +36,7 @@ const createUser = async (req, res) => {
             skills: Array.isArray(skills) ? skills : [],
             skillsEmbedding,
             openToCollaboration: openToCollaboration ?? true, // Default to true if not provided
+            expoPushToken, // Save the Expo Push Token if provided
         });
 
         // Log the data being saved
@@ -49,6 +48,7 @@ const createUser = async (req, res) => {
             openToCollaboration: newUser.openToCollaboration,
             descriptionEmbedding: newUser.descriptionEmbedding,
             skillsEmbedding: newUser.skillsEmbedding,
+            expoPushToken: newUser.expoPushToken,
         });
 
         // Save the user in MongoDB

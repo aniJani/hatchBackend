@@ -16,7 +16,7 @@ const userSchema = new Schema({
         default: ''
     },
     descriptionEmbedding: {
-        type: [Number], // Array of numbers representing the embedding vector
+        type: [Number],
         default: []
     },
     skills: {
@@ -24,7 +24,7 @@ const userSchema = new Schema({
         default: []
     },
     skillsEmbedding: {
-        type: [Number], // Embedding vector for the skills field
+        type: [Number],
         default: []
     },
     openToCollaboration: {
@@ -44,9 +44,13 @@ const userSchema = new Schema({
             type: String,
             default: 'collaborator'
         }
-    }]
+    }],
+    expoPushToken: {
+        type: String, // Field to store the Expo Push Token
+        default: null
+    }
 }, {
-    timestamps: true // Automatically manage createdAt and updatedAt fields
+    timestamps: true
 });
 
 module.exports = mongoose.model('User', userSchema);
