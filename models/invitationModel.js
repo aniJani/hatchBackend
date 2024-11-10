@@ -7,14 +7,12 @@ const invitationSchema = new Schema({
         ref: 'Project',
         required: true
     },
-    inviterId: {
-        type: Schema.Types.ObjectId,
-        ref: 'User',
+    inviterEmail: {
+        type: String,
         required: true
     },
-    inviteeId: {
-        type: Schema.Types.ObjectId,
-        ref: 'User',
+    inviteeEmail: {
+        type: String,
         required: true
     },
     status: {
