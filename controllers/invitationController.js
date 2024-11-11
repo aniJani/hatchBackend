@@ -71,4 +71,30 @@ const getInvitationsForInviter = async (req, res) => {
     }
 };
 
-module.exports = { sendInvitation, getInvitationsForInvitee, getInvitationsForInviter };
+const updateInvitationStatus = async (req, res) => {
+    const { invitationId } = req.params;
+    const { status } = req.body;
+
+    if (!['accepted', 'declined'].includes(status)) {
+        return res.status(400).json({ error: 'Invalid status' });
+    }
+
+    try {
+        const invitation = await Invitation.findByIdAndUpdate(
+            invitationId,
+            { status },
+            { new: true }
+        );
+
+        if (!invitation) {
+            return res.status(404).json({ error: 'Invitation not found' });
+        }
+
+        res.status(200).json({ message: 'Invitation status updated', invitation });
+    } catch (error) {
+        console.error('Error updating invitation status:', error);
+        res.status(500).json({ error: 'Failed to update invitation status' });
+    }
+};
+
+module.exports = { sendInvitation, getInvitationsForInvitee, getInvitationsForInviter, updateInvitationStatus };
