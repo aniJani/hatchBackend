@@ -2,11 +2,13 @@
 
 const express = require('express');
 const router = express.Router();
-const Chat = require('../models/chatModel')
+const Chat = require('../models/chatModel');
 
-// GET messages for a specific project
+// GET messages for a specific project with optional limit
 router.get('/:projectId', async (req, res) => {
     const { projectId } = req.params;
+    const limit = parseInt(req.query.limit) || 50; // Default to 50 messages
+
     try {
         let chat = await Chat.findOne({ projectId });
         if (!chat) {
@@ -14,7 +16,14 @@ router.get('/:projectId', async (req, res) => {
             chat = new Chat({ projectId, messages: [] });
             await chat.save();
         }
-        res.json(chat.messages);
+
+        // Return the latest 'limit' messages
+        const latestMessages = chat.messages
+            .sort((a, b) => b.timestamp - a.timestamp)
+            .slice(0, limit)
+            .reverse(); // Reverse to maintain chronological order
+
+        res.json(latestMessages);
     } catch (error) {
         console.error('Error fetching chat messages:', error);
         res.status(500).json({ message: 'Server error' });
@@ -41,7 +50,14 @@ router.post('/:projectId', async (req, res) => {
         chat.messages.push({ sender, content });
         await chat.save();
 
-        res.status(201).json(chat.messages);
+        // Fetch the latest 'limit' messages to return
+        const limit = 50;
+        const latestMessages = chat.messages
+            .sort((a, b) => b.timestamp - a.timestamp)
+            .slice(0, limit)
+            .reverse();
+
+        res.status(201).json(latestMessages);
     } catch (error) {
         console.error('Error sending chat message:', error);
         res.status(500).json({ message: 'Server error' });
