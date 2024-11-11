@@ -99,3 +99,20 @@ exports.handleOrganization = async (req, res) => {
         res.status(500).json({ message: 'Server error.' });
     }
 };
+
+exports.getOrganizationById = async (req, res) => {
+    try {
+        const { organizationId } = req.params;
+
+        const organization = await Organization.findById(organizationId).populate('members');
+
+        if (!organization) {
+            return res.status(404).json({ message: 'Organization not found.' });
+        }
+
+        res.status(200).json({ organization });
+    } catch (error) {
+        console.error('Error fetching organization:', error);
+        res.status(500).json({ message: 'Server error.' });
+    }
+};
