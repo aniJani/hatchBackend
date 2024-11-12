@@ -1,6 +1,8 @@
 const openai = require('../config/openaiconfig');
 const axios = require('axios');
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
+const Project = require('../../models/projectModel'); // Adjust path if necessary
+const User = require('../../models/userModel'); // Import User model to fetch user details
 
 const getEmbedding = async (text) => {
     try {
@@ -120,4 +122,65 @@ function cosineSimilarity(vec1, vec2) {
     return dotProduct; // Since vectors are normalized, dot product equals cosine similarity
 }
 
-module.exports = { generateDivTasks, getEmbedding };
+const generateAIReply = async ({ collaborators, projectInfo, goals, userMessage }) => {
+    try {
+        // Construct a detailed list of collaborators with their skills
+        const collaboratorDetails = collaborators.map(collab => ({
+            name: collab.name,
+            email: collab.email,
+            skills: collab.skills
+        }));
+
+        // Create a descriptive string of collaborators and their skills
+        const collaboratorsDescription = collaboratorDetails.map(collab => {
+            return `${collab.name} (${collab.email}) has skills in: ${collab.skills.join(', ')}.`;
+        }).join(' ');
+
+        const prompt = `
+You are an AI assistant with expertise in various domains. Here is the context of the current project:
+
+Collaborators:
+${collaboratorsDescription}
+
+User Message:
+"${userMessage}"
+
+Provide a helpful and concise response addressing the user's message based on the project context and collaborator skills above. Give a short, concise message like a short chat. Do not use formatting at all.
+`;
+
+        // Use the OpenAI SDK to create a chat completion
+        const response = await openai.chat.completions.create({
+            model: 'gpt-4-0125-preview', // Ensure this model is available in your OpenAI account
+            messages: [
+                {
+                    role: 'user',
+                    content: prompt
+                }
+            ],
+            max_tokens: 800,
+        });
+
+        // Log the entire response for debugging purposes
+        console.log('OpenAI Response:', JSON.stringify(response, null, 2));
+
+        return response.choices[0].message['content']
+
+    } catch (error) {
+        // Enhanced error handling
+        if (error.response) {
+            // The request was made, and the server responded with a status code outside of the 2xx range
+            console.error('Error response from OpenAI API:', error.response.data);
+            throw new Error(`OpenAI API Error: ${error.response.data.error.message}`);
+        } else if (error.request) {
+            // The request was made, but no response was received
+            console.error('No response received from OpenAI API:', error.request);
+            throw new Error('No response received from OpenAI API');
+        } else {
+            // Something else happened while setting up the request
+            console.error('Error setting up the request:', error.message);
+            throw new Error(`Error generating AI reply: ${error.message}`);
+        }
+    }
+};
+
+module.exports = { generateDivTasks, getEmbedding, generateAIReply };
