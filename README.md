@@ -191,4 +191,4 @@ Contributions are welcome! Please fork the repository, create a branch for your 
 
 ## License
 
-This project is licensed under the ISC License.
+This project is licensed under the MIT License.
