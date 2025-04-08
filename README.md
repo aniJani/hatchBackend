@@ -1,5 +1,5 @@
 # HatchBackend
-The frontend repository for this application can be found at: https://github.com/aniJani/hatchmobile
+The frontend repository for this application can be found at: https://github.com/aniJani/hatchmobile.
 HatchBackend is the server-side component of the HatchMobile application, providing API endpoints for project management, user authentication, collaboration tools, and AI-powered features. Built with Node.js, Express, and MongoDB, it handles data management and business logic for the mobile application.
 
 ## Table of Contents
